@@ -1,0 +1,11 @@
+img.uploadedImage {
+    width: inherit;
+    height: inherit;
+
+}
+
+.uploadContainer {
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+}
