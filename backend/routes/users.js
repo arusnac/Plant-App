@@ -54,4 +54,22 @@ router.post('/water', async (req, res) => {
     res.json(result);
 });
 
+router.post('/edit', async (req, res) => {
+    console.log(req.body);
+    let param = req.query.username;
+    const name = req.body.name;
+    const plantId = req.body.id;
+    console.log(req.body);
+
+    const result = await UserModel.findOne({ username: param }).then(doc => {
+        console.log(doc)
+        let plant = doc.plants.id(plantId);
+        console.log(plant.id)
+        plant.name = name;
+        doc.save();
+
+    })
+    res.json(result);
+})
+
 export default router;

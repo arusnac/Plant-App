@@ -9,6 +9,8 @@ import Paper from '@mui/material/Paper';
 import styles from './UploadImage.module.css'
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 
 async function postImage({ image, description }) {
@@ -22,7 +24,7 @@ async function postImage({ image, description }) {
     return result.data
 }
 
-const UploadImageToS3WithReactS3 = () => {
+const UploadImageToS3WithReactS3 = ({ buttonType }) => {
     const PATH = useSelector((state) => state.user.value)
     const [file, setFile] = useState()
     const [description, setDescription] = useState("")
@@ -41,6 +43,10 @@ const UploadImageToS3WithReactS3 = () => {
             dispatch(setImagePath(response.imagePath))
         })
     }
+
+    useEffect(() => {
+        console.log(buttonType)
+    })
 
     const Input = styled('input')({
         display: 'none',
@@ -65,9 +71,15 @@ const UploadImageToS3WithReactS3 = () => {
 
             <label htmlFor="contained-button-file">
                 <Input onChange={submit} accept="image/*" id="contained-button-file" multiple type="file" />
-                <Button variant="contained" component="span">
-                    Upload
-                </Button>
+                {buttonType === 'icon'
+                    ?
+                    <IconButton variant="contained" component="span" color="success" aria-label="add to shopping cart">
+                        <AddPhotoAlternateIcon />
+                    </IconButton>
+                    : <Button variant="contained" component="span">
+                        Upload
+                    </Button>}
+
             </label>
 
             {images.map(image => (
