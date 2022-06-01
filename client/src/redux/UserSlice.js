@@ -14,7 +14,8 @@ export const userSlice = createSlice({
     initialState: { value: initialState },
     reducers: {
         toggleStatus: (state, action) => {
-            state.value.user[0].isLoggedIn = !state.value.user[0].isLoggedIn;
+            state.value.user[0].isLoggedIn = action.payload;
+            console.log(state.value.user[0].isLoggedIn)
         },
         setImagePath: (state, action) => {
             state.value.imagePath = action.payload;

@@ -6,27 +6,47 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import OpacityIcon from '@mui/icons-material/Opacity';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import { DialogContent, DialogContentText, DialogActions, DialogTitle, Dialog } from '@mui/material';
+import { createFilterOptions } from '@mui/material/Autocomplete';
 import { useState, useEffect } from 'react'
 import Axios from 'axios';
 import plantInfo from '../assets/plantInfo.json'
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import UploadImage from '../components/UploadImage'
 import { useSelector } from 'react-redux';
-
+const filter = createFilterOptions();
 const PlantCard = ({ userName, name, image, location, watered, id }) => {
+    //Toggles the edit options for name and location
     const [editing, setEditing] = useState(false)
+
+    //Hold plant info and reRender on edits
     const [plantName, setPlantName] = useState('')
     const [waterDate, setWaterDate] = useState(watered)
+    const [imagePath, setImagePath] = useState(image)
+    const [valueLocation, setValueLocation] = useState(null);
+
+    //Toggles the light info modal
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const [imageButton, showImageButton] = useState(false);
-    const v = useSelector((state) => state.user.value.imagePath)
 
+    const [imageButton, showImageButton] = useState(false);
+    const PATH = useSelector((state) => state.user.value.imagePath)
+
+    //handles the the upload image modal
+    const [openEdit, setOpenEdit] = useState(false);
+    const handleOpenEdit = () => setOpenEdit(true);
+    const handleCloseEdit = () => setOpenEdit(false);
+
+
+    //Set the name and image path from the props
     useEffect(() => {
         setPlantName(name);
+        setImagePath(image);
+        setValueLocation(location);
     }, [])
 
+    //Update the watering date to today
     const updateWatered = (plantId) => {
         const watered = new Date().toLocaleDateString();
         const id = plantId;
@@ -41,9 +61,10 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
         });
     }
 
-    const editInfo = (plantId, name) => {
+    //Edit the plants name
+    const editInfo = (plantId, name, location) => {
         const id = plantId;
-        Axios.post('http://localhost:5000/user/edit', { id: id, name: name }, {
+        Axios.post('http://localhost:5000/user/edit', { id: id, name: name, location: location }, {
             params:
             {
                 username: userName,
@@ -51,10 +72,28 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
             }
         }).then((response) => {
             setPlantName(name)
+            setValueLocation(location)
+            handleCloseEdit(false)
             setEditing(false)
         });
     }
 
+    const editLocation = (plantId, location) => {
+        const id = plantId;
+        Axios.post('http://localhost:5000/user/editLocation', { id: id, location: location }, {
+            params:
+            {
+                username: userName,
+                id: plantId
+            }
+        }).then((response) => {
+            setValueLocation(location)
+            handleCloseEdit(false)
+            setEditing(false)
+        });
+    }
+
+    //Upload a new image for the plant
     const editImage = (plantId, PATH) => {
         const id = plantId;
         Axios.post('http://localhost:5000/user/editImage', { id: id, imagePath: PATH }, {
@@ -64,29 +103,28 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
                 id: plantId
             }
         }).then((response) => {
-            setPlantName(name)
-            setEditing(false)
+            setImagePath(PATH)
+            setOpenEdit(false)
         });
     }
 
+    //Toggle light modal
     const [light, setLight] = useState('');
 
+    //If the plants light info exists, show in a modal
     const lightInfo = (name) => {
-
         const plantName = name.toUpperCase();
         setPlantName(plantName);
         if (plantName in plantInfo) {
             setLight(plantInfo[plantName].LIGHT)
-            console.log(light)
         }
         else {
             setLight('No light information found')
         }
-
         handleOpen();
     }
 
-
+    //style for modal
     const style = {
         position: 'absolute',
         top: '50%',
@@ -98,11 +136,13 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
         boxShadow: 24,
         p: 4,
     };
+
+    //Test data for the input boxes
     const plantData = [{ name: "AFRICAN VIOLET PLANT" }, { name: "AGAVE PLANT" }, { name: "ALOCASIA" }, { name: "ALOCASIA – JEWEL ALOCASIA" }, { name: "ALOE VERA PLANT" }, { name: "AMARYLLIS" }, { name: "ANGEL WING BEGONIA" }, { name: "ANTHURIUM" },
     { name: "ARALIA PLANT" }, { name: "ARALIA PLANT – BALFOUR" }, { name: "ARECA PALM" }, { name: "ARROWHEAD PLANT" }, { name: "ASPARAGUS FERN" }, { name: "AZALEA" },
     { name: "BABY’S TEARS PLANT" }, { name: "BAMBOO PALM" }, { name: "BEGONIA PLANT" }, { name: "TERRARIUM" }, { name: "WANDERING JEW PLANT" }, { name: "YUCCA PLANT" }, { name: "ZAMIOCULCAS ZAMIIFOLIA - ZZ PLANT" }, { name: "ZEBRA PLANT" }]
 
-
+    const options = [{ location: 'bedroom' }, { location: 'kitchen' }, { location: 'living room' }]
 
     return (
         <div>
@@ -130,8 +170,9 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
                             onKeyDown={(event, newInputValue) => {
                                 if (event.key === 'Enter') {
                                     // Prevent's default 'Enter' behavior.
-                                    editInfo(id, plantName)
-                                    setEditing(false)
+                                    editInfo(id, plantName);
+                                    editLocation(id, valueLocation);
+                                    setEditing(false);
                                     // your handler code
                                 }
                             }}
@@ -144,13 +185,76 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
                 <CardMedia component="img"
                     alt="user plant"
                     height="180"
-                    image={image} />
+                    image={imagePath} />
 
                 <CardContent>
 
-                    <Typography>Location: {location}<br />
+                    {
+                        editing
+                            ?
+                            <Autocomplete
+                                value={valueLocation}
+                                onChange={(event, newValue) => {
+                                    if (typeof newValue === 'string') {
+                                        setValueLocation(
+                                            newValue
+                                        );
+                                        console.log(valueLocation)
+                                    } else if (newValue && newValue.inputValue) {
+                                        // Create a new value from the user input
+                                        setValueLocation(
+                                            newValue.inputValue,
 
-                    </Typography>
+                                        );
+                                        console.log(valueLocation)
+                                    } else {
+                                        setValueLocation(newValue);
+                                        console.log(valueLocation)
+                                    }
+                                }}
+                                filterOptions={(options, params) => {
+                                    const filtered = filter(options, params);
+
+                                    const { inputValue } = params;
+                                    // Suggest the creation of a new value
+                                    const isExisting = options.some((option) => inputValue === option.title);
+                                    if (inputValue !== '' && !isExisting) {
+                                        filtered.push({
+                                            inputValue,
+                                            title: `Add "${inputValue}"`,
+                                        });
+                                    }
+
+                                    return filtered;
+                                }}
+                                selectOnFocus
+                                clearOnBlur
+                                handleHomeEndKeys
+                                id="free-solo-with-text-demo"
+                                options={options}
+                                getOptionLabel={(option) => {
+                                    // Value selected with enter, right from the input
+                                    if (typeof option === 'string') {
+                                        return option;
+                                    }
+                                    // Add "xxx" option created dynamically
+                                    if (option.inputValue) {
+                                        return option.inputValue;
+                                    }
+                                    // Regular option
+                                    return option.location;
+                                }}
+                                renderOption={(props, option) => <li {...props}>{option.location}</li>}
+                                sx={{ width: 270 }}
+                                freeSolo
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Location" value="test" />
+                                )}
+                            />
+                            :
+                            <Typography>Location: {valueLocation}<br />
+                            </Typography>
+                    }
                     <Typography>Last watered: {waterDate}</Typography>
                     {/* <IconButton variant="contained" color="primary"><OpacityIcon /></IconButton> */}
                 </CardContent>
@@ -160,27 +264,47 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
                     <IconButton color="primary" aria-label="light info">
                         <InfoIcon value={plantName} onClick={() => lightInfo(plantName)} />
                     </IconButton>
-                    {!editing ? <IconButton color="primary" aria-label="add to shopping cart">
-                        <EditIcon onClick={() => setEditing(!editing)} />
-                    </IconButton>
-                        : <div>
-                            <IconButton color="error" aria-label="add to shopping cart">
-                                <CancelIcon onClick={() => setEditing(!editing)} />
-                            </IconButton>
-                            <IconButton color="success" aria-label="add to shopping cart">
-                                <CheckCircleIcon onClick={() => editInfo(id, plantName)} />
-                            </IconButton>
-                        </div>}
+                    {
+                        !editing ? <IconButton color="primary" aria-label="add to shopping cart">
+                            <EditIcon onClick={() => setEditing(!editing)} />
+                        </IconButton>
+                            : <div>
+                                <IconButton color="error" aria-label="add to shopping cart">
+                                    <CancelIcon onClick={() => setEditing(!editing)} />
+                                </IconButton>
+                                <IconButton color="success" aria-label="add to shopping cart">
+                                    <CheckCircleIcon onClick={() => editInfo(id, plantName, valueLocation)} />
+                                </IconButton>
+                            </div>
+                    }
+
                     <IconButton color="primary" aria-label="add to shopping cart">
                         <OpacityIcon onClick={() => updateWatered(id)} />
                     </IconButton>
-                    {imageButton &&
-                        <UploadImage buttonType='icon' />
+                    {imageButton && <IconButton color="success" aria-label="uplaod new image">
+                        <AddPhotoAlternateIcon onClick={handleOpenEdit} />
+                    </IconButton>
+
                     }
 
                 </CardActions>
             </Card>
 
+            <Modal
+                open={openEdit}
+                onClose={handleCloseEdit}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={style}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                        {plantName}
+                    </Typography>
+                    <UploadImage onChange={() => setImagePath(PATH)} buttonType='icon' />
+                    <Button onClick={() => editImage(id, PATH)}>Save</Button>
+                    <Button onClick={() => handleCloseEdit(false)}>Cancel</Button>
+                </Box>
+            </Modal>
 
             <Modal
                 open={open}

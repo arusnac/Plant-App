@@ -22,6 +22,9 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import PlantCard from './components/PlantCard'
 
+import LoginPage from './components/LoginPage'
+import { BrowserRouter as Router, Switch, Route, Routes } from "react-router-dom";
+
 
 const App = () => {
   const [plantList, setPlantList] = useState([])
@@ -33,34 +36,43 @@ const App = () => {
   const imagePath = useSelector((state) => state.user.value)
   const [showStack, setShowStack] = useState(false)
   const [open, setOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState('')
 
   const { getSession, logout, getUser } = useContext(AccountContext);
 
+  const URL = 'http://localhost:5000/user/'
   const user = getUser();
   const PATH = useSelector((state) => state.user.value)
-  const userStatus = useSelector((state) => state.user.value);
-
+  const userStatus = useSelector((state) => state.user.value.user[0].isLoggedIn);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log(plantInfo)
+    dispatch(toggleStatus(window.localStorage.getItem('userStatus')));
+    console.log(getSession())
     let userName = ''
     if (user) {
       userName = user.username;
-
+      setCurrentUser(userName)
+      console.log(userName)
       setLoggedIn(true);
+      Axios.get(URL, {
+        params:
+          { username: userName }
+      })
+        .then((response) => {
+          // formatDate(response.data.plants);
+          setPlantList(response.data.plants);
+        })
     } else {
       userName = '';
     }
 
-    Axios.get('http://localhost:5000/user', {
-      params:
-        { username: userName }
-    })
-      .then((response) => {
-        // formatDate(response.data.plants);
-        setPlantList(response.data.plants);
-      })
-  }, [])
+  }, [userStatus])
+
+  // useEffect(() => {
+  //   window.localStorage.setItem('userStatus', userStatus);
+  //   console.log(userStatus)
+  // }, [userStatus]);
 
 
   //Add plant to the user collection
@@ -68,8 +80,8 @@ const App = () => {
     let watered = new Date().toLocaleDateString();
     setDate(watered);
     setImage('plant1');
-    let imagePath = 'http://localhost:5000' + PATH.imagePath
-    Axios.post('http://localhost:5000/user/update', { name: name, location: location, watered: watered, image: imagePath }, {
+    let imagePath = PATH.imagePath;
+    Axios.post(URL + 'update', { name: name, location: location, watered: watered, image: imagePath }, {
       params:
         { username: user.username }
     }).then((response) => {
@@ -94,16 +106,17 @@ const App = () => {
           <Navbar.Brand href="#home">PLANTS!! </Navbar.Brand>
 
           <Navbar.Collapse className="justify-content-end">
-            <Nav.Link><Status /></Nav.Link>
+            {userStatus && <><Nav.Link>Welcome {currentUser}</Nav.Link>
+              <button onClick={logout}>Logout</button>
+            </>}
           </Navbar.Collapse>
 
         </Container>
       </Navbar>
-      {/* {userStatus.user[0].isLoggedIn && <SignUp />} */}
-      {!loggedIn && <SignUp />}
-      {!loggedIn && < Login />}
+      {!userStatus && <LoginPage />}
+
       <Container>
-        <div className="App">
+        {user && <div className="App">
           {!showStack && < Button variant="contained" color="primary" onClick={toggleStack}>Add Plant</Button>}
           {showStack && <Stack
             direction="column"
@@ -126,7 +139,7 @@ const App = () => {
 
           </div>
 
-        </div >
+        </div >}
       </Container >
     </div >
 

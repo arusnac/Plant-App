@@ -1,11 +1,13 @@
 import React, { createContext } from 'react';
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
 import Pool from '../UserPool';
+import { toggleStatus } from '../redux/UserSlice'
+import { useDispatch } from 'react-redux';
 
 const AccountContext = createContext();
 
 const Account = (props) => {
-
+    const dispatch = useDispatch();
     const getSession = async () => {
         return await new Promise((resolve, reject) => {
             const user = Pool.getCurrentUser();
@@ -61,8 +63,9 @@ const Account = (props) => {
     const logout = () => {
         const user = Pool.getCurrentUser();
         if (user) {
-            // dispatch(toggleStatus());
+            dispatch(toggleStatus(false));
             user.signOut();
+            window.localStorage.setItem('userStatus', false);
         }
     }
 

@@ -5,6 +5,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    email: {
+        type: String,
+    },
     plants: [{ name: String, location: String, watered: String, image: String }]
 });
 

@@ -32,6 +32,7 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
     const [imagePath, setImagePath2] = useState('')
     const dispatch = useDispatch();
 
+    //post image then set the path to user slice for retrieval
     const submit = async event => {
         const file = event.target.files[0]
         setFile(file)
@@ -40,7 +41,7 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
             let path = 'http://localhost:5000' + response.imagePath
             setImagePath2(path)
             setImages([response.image, ...images])
-            dispatch(setImagePath(response.imagePath))
+            dispatch(setImagePath(path))
         })
     }
 
@@ -63,17 +64,12 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
 
     return (
         <div className={styles.uploadContainer}>
-            {/* <form onSubmit={submit}>
-                <input onChange={submit} type="file" accept="image/*"></input>
-                <input value={description} onChange={e => setDescription(e.target.value)} type="text"></input>
-                <Button variant="contained" color="primary" type="submit">Upload</Button>
-            </form> */}
-
+            {/* Change the buttons type depending on where the element is placed */}
             <label htmlFor="contained-button-file">
                 <Input onChange={submit} accept="image/*" id="contained-button-file" multiple type="file" />
                 {buttonType === 'icon'
                     ?
-                    <IconButton variant="contained" component="span" color="success" aria-label="add to shopping cart">
+                    <IconButton variant="contained" component="span" color="success" aria-label="uplaod new image">
                         <AddPhotoAlternateIcon />
                     </IconButton>
                     : <Button variant="contained" component="span">
@@ -82,16 +78,17 @@ const UploadImageToS3WithReactS3 = ({ buttonType }) => {
 
             </label>
 
-            {images.map(image => (
+            {/* {images.map(image => (
                 <div key={image}>
                     <img src={image}></img>
                 </div>
-            ))}
+            ))} */}
+            {/* Display the uploaded image before saving to mongoDB document */}
             {imagePath && <Box
                 sx={{
                     display: 'flex',
-                    width: 375,
-                    height: 375,
+                    width: 330,
+                    height: 330,
                     backgroundColor: 'primary.dark'
                 }}>
                 <img className={styles.uploadedImage} src={imagePath} alt='uploaded' />
