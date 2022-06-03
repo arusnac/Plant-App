@@ -1,12 +1,15 @@
-import React, { createContext } from 'react';
+import React, { createContext, useState } from 'react';
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
 import Pool from '../UserPool';
 import { toggleStatus } from '../redux/UserSlice'
 import { useDispatch } from 'react-redux';
+import { Navigate } from "react-router-dom";
 
 const AccountContext = createContext();
 
 const Account = (props) => {
+
+
     const dispatch = useDispatch();
     const getSession = async () => {
         return await new Promise((resolve, reject) => {
@@ -69,11 +72,15 @@ const Account = (props) => {
         }
     }
 
-    return (
-        <AccountContext.Provider value={{ authenticate, getSession, logout, getUser }}>
-            {props.children}
 
-        </AccountContext.Provider>
+
+    return (
+        <>
+            <AccountContext.Provider value={{ authenticate, getSession, logout, getUser }}>
+                {props.children}
+
+            </AccountContext.Provider>
+        </>
     );
 };
 

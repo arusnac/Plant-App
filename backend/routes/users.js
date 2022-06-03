@@ -4,13 +4,22 @@ import UserModel from '../models/User.js'
 
 router.get('/', (req, res) => {
     let param = req.query.username;
-    console.log("hello");
     UserModel.findOne({ userName: param }, (err, result) => {
         if (err) {
             res.json(err);
         } else {
             res.json(result);
         }
+    })
+})
+
+router.get('/plant', (req, res) => {
+    let param = req.query.username;
+    let plantId = req.query.id;
+    const result = UserModel.findOne({ username: param }).then(doc => {
+
+        let plant = doc.plants.id(plantId);
+        res.json(plant);
     })
 })
 

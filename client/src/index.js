@@ -6,23 +6,22 @@ import reportWebVitals from './reportWebVitals';
 import store from './redux/Store';
 import { Provider } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { BrowserRouter, Routes, Route, Redirect } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignUp from './components/SignUp'
 import Login from './components/Login'
-import { PrivateRoute } from './PrivateRoute';
-import { useSelector } from 'react-redux';
+import PlantPage from './components/PlantPage';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-const userStatus = useSelector((state) => state.user.value.user[0].isLoggedIn);
 root.render(
   <BrowserRouter>
     <React.StrictMode>
       <Provider store={store}>
         <Account>
           <Routes>
-            <Route exact path='/' element={<App />} />
+            <Route path='/' element={<App />} />
             <Route path='login' element={<Login />} />
             <Route path='SignUp' element={<SignUp />} />
+            <Route path='plantpage/:plantId' element={<PlantPage />} />
           </Routes>
         </Account>
       </Provider>

@@ -6,7 +6,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import OpacityIcon from '@mui/icons-material/Opacity';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import { DialogContent, DialogContentText, DialogActions, DialogTitle, Dialog } from '@mui/material';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import { useState, useEffect } from 'react'
 import Axios from 'axios';
@@ -14,6 +13,8 @@ import plantInfo from '../assets/plantInfo.json'
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import UploadImage from '../components/UploadImage'
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom'
+
 const filter = createFilterOptions();
 const PlantCard = ({ userName, name, image, location, watered, id }) => {
     //Toggles the edit options for name and location
@@ -37,7 +38,7 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
     const [openEdit, setOpenEdit] = useState(false);
     const handleOpenEdit = () => setOpenEdit(true);
     const handleCloseEdit = () => setOpenEdit(false);
-
+    let navigate = useNavigate();
 
     //Set the name and image path from the props
     useEffect(() => {
@@ -151,7 +152,14 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
                 onMouseOut={() => showImageButton(false)}
                 onMouseOver={() => showImageButton(true)}
                 variant="outlined" sx={{
-                    minWidth: 275, maxWidth: 300, '&:hover': {}
+                    minWidth: 275,
+                    maxWidth: 275,
+                    '&:hover': {},
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    boxShadow: 4
                 }}>
                 {editing
                     ? <Stack spacing={1} sx={{ width: 275 }}>
@@ -182,9 +190,12 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
                         title={plantName}
                     />}
 
-                <CardMedia component="img"
+                <CardMedia
+                    component="img"
                     alt="user plant"
-                    height="180"
+                    height="280"
+
+                    sx={{ width: 250, boxShadow: 2 }}
                     image={imagePath} />
 
                 <CardContent>
@@ -261,28 +272,29 @@ const PlantCard = ({ userName, name, image, location, watered, id }) => {
 
                 {/* <Button size="small" variant="contained" color="primary" value={plants.name} onClick={lightInfo}>?</Button> */}
                 <CardActions>
-                    <IconButton color="primary" aria-label="light info">
-                        <InfoIcon value={plantName} onClick={() => lightInfo(plantName)} />
+                    <Button onClick={() => { navigate(`/plantpage/${id}`) }}>More Info</Button>
+                    <IconButton value={plantName} onClick={() => lightInfo(plantName)} color="primary" aria-label="light info">
+                        <InfoIcon />
                     </IconButton>
                     {
-                        !editing ? <IconButton color="primary" aria-label="add to shopping cart">
-                            <EditIcon onClick={() => setEditing(!editing)} />
+                        !editing ? <IconButton onClick={() => setEditing(!editing)} color="primary" aria-label="add to shopping cart">
+                            <EditIcon />
                         </IconButton>
                             : <div>
-                                <IconButton color="error" aria-label="add to shopping cart">
-                                    <CancelIcon onClick={() => setEditing(!editing)} />
+                                <IconButton onClick={() => setEditing(!editing)} color="error" aria-label="add to shopping cart">
+                                    <CancelIcon />
                                 </IconButton>
-                                <IconButton color="success" aria-label="add to shopping cart">
-                                    <CheckCircleIcon onClick={() => editInfo(id, plantName, valueLocation)} />
+                                <IconButton onClick={() => editInfo(id, plantName, valueLocation)} color="success" aria-label="add to shopping cart">
+                                    <CheckCircleIcon />
                                 </IconButton>
                             </div>
                     }
 
-                    <IconButton color="primary" aria-label="add to shopping cart">
-                        <OpacityIcon onClick={() => updateWatered(id)} />
+                    <IconButton onClick={() => updateWatered(id)} color="primary" aria-label="add to shopping cart">
+                        <OpacityIcon />
                     </IconButton>
-                    {imageButton && <IconButton color="success" aria-label="uplaod new image">
-                        <AddPhotoAlternateIcon onClick={handleOpenEdit} />
+                    {imageButton && <IconButton onClick={handleOpenEdit} color="success" aria-label="uplaod new image">
+                        <AddPhotoAlternateIcon />
                     </IconButton>
 
                     }
